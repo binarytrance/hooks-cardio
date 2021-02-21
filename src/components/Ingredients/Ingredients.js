@@ -34,7 +34,18 @@ const Ingredients = () => {
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => { // useCallback caches this function and therefor survives rerender cycles
     setUserIngredients(filteredIngredients);
-  }, [])
+  }, []);
+
+  const removeIngredientsHandler = ingredientId => {
+    fetch(`https://hooks-cardio-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {method: 'DELETE'})
+    .then(
+      response => {
+        setUserIngredients(prevIngredients =>
+          prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
+        );
+      }
+    )
+  }
 
   const addIngredientHandler = ingredient => {
     fetch('https://hooks-cardio-default-rtdb.firebaseio.com/ingredients.json', {
@@ -68,7 +79,7 @@ const Ingredients = () => {
         <Search onFilteredIngredients={filteredIngredientsHandler} />
         <IngredientList
           ingredients={userIngredients}
-          onRemoveItem={removeIngredientHandler}
+          onRemoveItem={removeIngredientsHandler}
         />
       </section>
     </div>
