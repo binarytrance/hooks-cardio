@@ -1,12 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useReducer, useEffect, useCallback } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
 import ErrorModal from '../UI/ErrorModal';
 
+const ingredientReducer = (currentIngredients, action) => {
+  switch (action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [
+        ...currentIngredients,
+        action.ingredient
+      ];
+    case 'DELETE':
+      return currentIngredients.filter(ingredient => ingredient.id !== action.id)
+    default:
+      throw new Error('Beware of harlots!');
+  }
+}
+
 const Ingredients = () => {
-  const [userIngredients, setUserIngredients] = useState([]);
+  const [userIngredients, dispatch] = useReducer(ingredientReducer, []); // reducer fn and initial state
+  // const [userIngredients, setUserIngredients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -36,7 +53,8 @@ const Ingredients = () => {
   }, [userIngredients])
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => { // useCallback caches this function and therefor survives rerender cycles
-    setUserIngredients(filteredIngredients);
+    // setUserIngredients(filteredIngredients);
+    dispatch({type: 'ADD', ingredients: filteredIngredients})
   }, []);
 
   const removeIngredientsHandler = ingredientId => {
@@ -45,9 +63,10 @@ const Ingredients = () => {
     .then(
       response => {
         setIsLoading(false)
-        setUserIngredients(prevIngredients =>
-          prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
-        );
+        // setUserIngredients(prevIngredients =>
+        //   prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
+        // );
+        dispatch({type: 'DELETE', id: ingredientId})
       }
     ).catch(error => {
       setIsLoading(false);
@@ -69,10 +88,11 @@ const Ingredients = () => {
       })
       .then(responseData => {
         setIsLoading(false);
-        setUserIngredients(prevIngredients => [
-          ...prevIngredients,
-          { id: responseData.name, ...ingredient }
-        ]);
+        // setUserIngredients(prevIngredients => [
+        //   ...prevIngredients,
+        //   { id: responseData.name, ...ingredient }
+        // ]);
+        dispatch({type: 'ADD', ingredient: { id: responseData.name, ...ingredient }})
       });
   };
   const clearError = () => {
