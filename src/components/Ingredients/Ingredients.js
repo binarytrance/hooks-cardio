@@ -1,10 +1,12 @@
-import React, { useState, useReducer, useEffect, useCallback } from 'react';
+import React, {  useReducer, useEffect, useCallback } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
 import ErrorModal from '../UI/ErrorModal';
 
+
+// the value of new state depends on the old state
 const ingredientReducer = (currentIngredients, action) => {
   switch (action.type) {
     case 'SET':
@@ -21,11 +23,28 @@ const ingredientReducer = (currentIngredients, action) => {
   }
 }
 
+// connected states
+const httpStateReducer = (currentState, action) => {
+  switch (action.type) {
+    case 'SEND':
+      return {...currentState, loading: true};
+    case 'SUCCESS':
+      return {...currentState, loading: false};
+    case 'ERROR':
+      return {loading: false, error: action.errorMessage};
+    case 'CLEAR':
+      return {...currentState, error: null}
+    default:
+      throw new Error('Beware of http harlots!');
+  }
+}
+
 const Ingredients = () => {
   const [userIngredients, dispatch] = useReducer(ingredientReducer, []); // reducer fn and initial state
+  const [httpState, httpDispatch] = useReducer(httpStateReducer, {loading: false, error: null})
   // const [userIngredients, setUserIngredients] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState(false);
 
   // useEffect(() => {
   //   fetch('https://hooks-cardio-default-rtdb.firebaseio.com/ingredients.json')
@@ -54,28 +73,31 @@ const Ingredients = () => {
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => { // useCallback caches this function and therefor survives rerender cycles
     // setUserIngredients(filteredIngredients);
-    dispatch({type: 'ADD', ingredients: filteredIngredients})
+    dispatch({type: 'SET', ingredients: filteredIngredients})
   }, []);
 
   const removeIngredientsHandler = ingredientId => {
-    setIsLoading(true);
+    // setIsLoading(true);
+    httpDispatch({type: 'SEND'});
     fetch(`https://hooks-cardio-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {method: 'DELETE'})
     .then(
       response => {
-        setIsLoading(false)
+        // setIsLoading(false)
         // setUserIngredients(prevIngredients =>
         //   prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
         // );
-        dispatch({type: 'DELETE', id: ingredientId})
+        dispatch({type: 'DELETE', id: ingredientId});
+        httpDispatch({type: "SUCCESS"})
       }
     ).catch(error => {
-      setIsLoading(false);
-      setError('Something went wrong!')
+      // setIsLoading(false);
+      // setError('Something went wrong!')
+      httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
     })
   }
 
   const addIngredientHandler = ingredient => {
-    setIsLoading(true)
+    httpDispatch({type: 'SEND'});
     fetch('https://hooks-cardio-default-rtdb.firebaseio.com/ingredients.json', {
       method: 'POST',
       body: JSON.stringify(ingredient),
@@ -87,21 +109,25 @@ const Ingredients = () => {
         return response.json();
       })
       .then(responseData => {
-        setIsLoading(false);
+        httpDispatch({type: "SUCCESS"})
         // setUserIngredients(prevIngredients => [
         //   ...prevIngredients,
         //   { id: responseData.name, ...ingredient }
         // ]);
         dispatch({type: 'ADD', ingredient: { id: responseData.name, ...ingredient }})
-      });
+      }).catch(error => {
+      // setIsLoading(false);
+      // setError('Something went wrong!')
+      httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
+    });
   };
   const clearError = () => {
-    setError(null);
+    httpDispatch({type: 'CLEAR'})
   }
   return (
     <div className="App">
-      {error ? <ErrorModal onCLose={clearError}>{error}</ErrorModal> : null}
-      <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading}/>
+      {httpState.error ? <ErrorModal onCLose={clearError}>{httpState.error}</ErrorModal> : null}
+      <IngredientForm onAddIngredient={addIngredientHandler} loading={httpState.loading}/>
 
       <section>
         <Search onFilteredIngredients={filteredIngredientsHandler} />

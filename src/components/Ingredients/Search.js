@@ -16,7 +16,7 @@ const Search = React.memo(({onFilteredIngredients}) => {
           return response.json();
         })
         .then(responseData => {
-          console.log(responseData);
+          console.log(responseData, 'responsedata');
 
           const loadedIngredients = []
           for(const key in responseData) {
@@ -26,7 +26,9 @@ const Search = React.memo(({onFilteredIngredients}) => {
               amount: responseData[key].amount
             })
           }
-          onFilteredIngredients(loadedIngredients)
+          onFilteredIngredients(loadedIngredients);
+          console.log(loadedIngredients, 'lala');
+
         });
       }
     }, 500);
