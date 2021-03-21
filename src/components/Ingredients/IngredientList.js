@@ -2,8 +2,8 @@ import React from 'react';
 
 import './IngredientList.css';
 
-const IngredientList = React.memo(props => {
-  console.log(props.ingredients)
+const IngredientList = props => {
+  console.log(props.ingredients, 'ingredients list')
   return (
     <section className="ingredient-list">
       <h2>Loaded Ingredients</h2>
@@ -17,6 +17,6 @@ const IngredientList = React.memo(props => {
       </ul>
     </section>
   );
-});
+};
 
 export default IngredientList;

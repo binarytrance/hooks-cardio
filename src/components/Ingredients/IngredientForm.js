@@ -12,7 +12,6 @@ const IngredientForm = props => {
     event.preventDefault();
     props.onAddIngredient({ title: enteredTitle, amount: enteredAmount });
   };
-  console.log('form rendered')
 
   return (
     <section className="ingredient-form">

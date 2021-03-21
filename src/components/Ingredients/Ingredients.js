@@ -1,4 +1,4 @@
-import React, {  useReducer, useEffect, useCallback } from 'react';
+import React, {  useReducer, useCallback, useMemo } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -67,9 +67,9 @@ const Ingredients = () => {
   //     });
   // }, []);
 
-  useEffect(() => {
-    console.log('rerendering', userIngredients)
-  }, [userIngredients])
+  // useEffect(() => {
+  //   console.log('rerendering', userIngredients)
+  // }, [userIngredients])
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => { // useCallback caches this function and therefor survives rerender cycles
     // setUserIngredients(filteredIngredients);
@@ -124,6 +124,12 @@ const Ingredients = () => {
   const clearError = () => {
     httpDispatch({type: 'CLEAR'})
   }
+  const ingredientList = useMemo(() => {
+    return (<IngredientList
+      ingredients={userIngredients}
+      onRemoveItem={removeIngredientsHandler}
+    />)
+  }, [userIngredients, removeIngredientsHandler])
   return (
     <div className="App">
       {httpState.error ? <ErrorModal onCLose={clearError}>{httpState.error}</ErrorModal> : null}
@@ -131,10 +137,7 @@ const Ingredients = () => {
 
       <section>
         <Search onFilteredIngredients={filteredIngredientsHandler} />
-        <IngredientList
-          ingredients={userIngredients}
-          onRemoveItem={removeIngredientsHandler}
-        />
+        {ingredientList}
       </section>
     </div>
   );
