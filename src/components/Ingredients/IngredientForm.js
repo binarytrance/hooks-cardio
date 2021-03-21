@@ -4,7 +4,7 @@ import Card from '../UI/Card';
 import './IngredientForm.css';
 import LoadingIndicator from '../UI/LoadingIndicator'
 
-const IngredientForm = React.memo(props => {
+const IngredientForm = props => {
   const [enteredTitle, setEnteredTitle] = useState('');
   const [enteredAmount, setEnteredAmount] = useState('');
 
@@ -12,6 +12,7 @@ const IngredientForm = React.memo(props => {
     event.preventDefault();
     props.onAddIngredient({ title: enteredTitle, amount: enteredAmount });
   };
+  console.log('form rendered')
 
   return (
     <section className="ingredient-form">
@@ -47,6 +48,6 @@ const IngredientForm = React.memo(props => {
       </Card>
     </section>
   );
-});
+};
 
 export default IngredientForm;

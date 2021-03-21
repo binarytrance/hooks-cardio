@@ -76,7 +76,7 @@ const Ingredients = () => {
     dispatch({type: 'SET', ingredients: filteredIngredients})
   }, []);
 
-  const removeIngredientsHandler = ingredientId => {
+  const removeIngredientsHandler = useCallback(ingredientId => {
     // setIsLoading(true);
     httpDispatch({type: 'SEND'});
     fetch(`https://hooks-cardio-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {method: 'DELETE'})
@@ -94,9 +94,9 @@ const Ingredients = () => {
       // setError('Something went wrong!')
       httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
     })
-  }
+  }, [])
 
-  const addIngredientHandler = ingredient => {
+  const addIngredientHandler = useCallback(ingredient => {
     httpDispatch({type: 'SEND'});
     fetch('https://hooks-cardio-default-rtdb.firebaseio.com/ingredients.json', {
       method: 'POST',
@@ -120,7 +120,7 @@ const Ingredients = () => {
       // setError('Something went wrong!')
       httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
     });
-  };
+  }, []);
   const clearError = () => {
     httpDispatch({type: 'CLEAR'})
   }
