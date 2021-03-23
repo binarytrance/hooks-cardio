@@ -4,7 +4,7 @@ import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
 import ErrorModal from '../UI/ErrorModal';
-
+import useHttp from '../../customHooks/useHttp';
 
 // the value of new state depends on the old state
 const ingredientReducer = (currentIngredients, action) => {
@@ -23,25 +23,11 @@ const ingredientReducer = (currentIngredients, action) => {
   }
 }
 
-// connected states
-const httpStateReducer = (currentState, action) => {
-  switch (action.type) {
-    case 'SEND':
-      return {...currentState, loading: true};
-    case 'SUCCESS':
-      return {...currentState, loading: false};
-    case 'ERROR':
-      return {loading: false, error: action.errorMessage};
-    case 'CLEAR':
-      return {...currentState, error: null}
-    default:
-      throw new Error('Beware of http harlots!');
-  }
-}
+
 
 const Ingredients = () => {
   const [userIngredients, dispatch] = useReducer(ingredientReducer, []); // reducer fn and initial state
-  const [httpState, httpDispatch] = useReducer(httpStateReducer, {loading: false, error: null})
+  const [httpState, makeRequest] = useHttp()
   // const [userIngredients, setUserIngredients] = useState([]);
   // const [isLoading, setIsLoading] = useState(false);
   // const [error, setError] = useState(false);
@@ -78,51 +64,52 @@ const Ingredients = () => {
 
   const removeIngredientsHandler = useCallback(ingredientId => {
     // setIsLoading(true);
-    httpDispatch({type: 'SEND'});
-    fetch(`https://hooks-cardio-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {method: 'DELETE'})
-    .then(
-      response => {
-        // setIsLoading(false)
-        // setUserIngredients(prevIngredients =>
-        //   prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
-        // );
-        dispatch({type: 'DELETE', id: ingredientId});
-        httpDispatch({type: "SUCCESS"})
-      }
-    ).catch(error => {
-      // setIsLoading(false);
-      // setError('Something went wrong!')
-      httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
-    })
-  }, [])
+    // httpDispatch({type: 'SEND'});
+    // fetch(`https://hooks-cardio-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, {method: 'DELETE'})
+    // .then(
+    //   response => {
+    //     // setIsLoading(false)
+    //     // setUserIngredients(prevIngredients =>
+    //     //   prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
+    //     // );
+    //     dispatch({type: 'DELETE', id: ingredientId});
+    //     httpDispatch({type: "SUCCESS"})
+    //   }
+    // ).catch(error => {
+    //   // setIsLoading(false);
+    //   // setError('Something went wrong!')
+    //   httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
+    // })
+    makeRequest(`https://hooks-cardio-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`, 'DELETE')
+  }, [makeRequest])
 
   const addIngredientHandler = useCallback(ingredient => {
-    httpDispatch({type: 'SEND'});
-    fetch('https://hooks-cardio-default-rtdb.firebaseio.com/ingredients.json', {
-      method: 'POST',
-      body: JSON.stringify(ingredient),
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .then(response => {
-        // console.log(response.json());
+    // httpDispatch({type: 'SEND'});
+    // fetch('https://hooks-cardio-default-rtdb.firebaseio.com/ingredients.json', {
+    //   method: 'POST',
+    //   body: JSON.stringify(ingredient),
+    //   headers: { 'Content-Type': 'application/json' }
+    // })
+    //   .then(response => {
+    //     // console.log(response.json());
 
-        return response.json();
-      })
-      .then(responseData => {
-        httpDispatch({type: "SUCCESS"})
-        // setUserIngredients(prevIngredients => [
-        //   ...prevIngredients,
-        //   { id: responseData.name, ...ingredient }
-        // ]);
-        dispatch({type: 'ADD', ingredient: { id: responseData.name, ...ingredient }})
-      }).catch(error => {
-      // setIsLoading(false);
-      // setError('Something went wrong!')
-      httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
-    });
+    //     return response.json();
+    //   })
+    //   .then(responseData => {
+    //     httpDispatch({type: "SUCCESS"})
+    //     // setUserIngredients(prevIngredients => [
+    //     //   ...prevIngredients,
+    //     //   { id: responseData.name, ...ingredient }
+    //     // ]);
+    //     dispatch({type: 'ADD', ingredient: { id: responseData.name, ...ingredient }})
+    //   }).catch(error => {
+    //   // setIsLoading(false);
+    //   // setError('Something went wrong!')
+    //   httpDispatch({type: 'ERROR', errorMessage: "Mayday!"})
+    // });
   }, []);
   const clearError = () => {
-    httpDispatch({type: 'CLEAR'})
+    // httpDispatch({type: 'CLEAR'})
   }
   const ingredientList = useMemo(() => {
     return (<IngredientList
